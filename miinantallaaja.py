@@ -9,6 +9,7 @@ vaikeustaso = {
 }
 
 peli = {
+    "kesto": None,
     "aika_aloitus": None,
     "aika_lopetus": None,
     "ensimmainen_ruutu": True,
@@ -63,6 +64,16 @@ def avaa_ruutu(x_klikkaus, y_klikkaus):
                 kentta[y][x] = "x"
             peli["havitty"] = True
             peli["paattynyt"] = True
+            peli["aika_lopetus"] = time.time()
+
+def kello():
+    if not peli["paattynyt"]:
+        aika = time.localtime(time.time() - peli["aika_aloitus"])
+        kello = time.strftime("%M:%S", aika)
+    else:
+        peli["kesto"] = time.localtime(peli["aika_lopetus"] - peli["aika_aloitus"])
+        kello = time.strftime("%M:%S", peli["kesto"])
+    return kello
 
 def aseta_lippu(x, y):
     """
@@ -212,7 +223,7 @@ def piirra_kentta():
     if peli["ensimmainen_ruutu"]:
         miinantallaaja_UI.luo_teksti("AIKA: 00:00", leveys * 40 - 5, korkeus * 40 + 20, "right", "center")
     else:
-        miinantallaaja_UI.luo_teksti("AIKA: {}".format(round(time.time() - peli["aika_aloitus"])), leveys * 40 - 5, korkeus * 40 + 20, "right", "center")
+        miinantallaaja_UI.luo_teksti("AIKA: {}".format(kello()), leveys * 40 - 5, korkeus * 40 + 20, "right", "center")
     if peli["havitty"]:
         miinantallaaja_UI.luo_teksti("HÄVISIT PELIN!", leveys * 20, korkeus * 20 + 40, "center", "center", (255,0,0,255), 20)
     if peli["voitettu"]:

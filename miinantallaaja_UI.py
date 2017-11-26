@@ -1,5 +1,4 @@
 import pyglet
-import time
 
 HIIRI_VASEN = pyglet.window.mouse.LEFT
 HIIRI_KESKI = pyglet.window.mouse.MIDDLE
@@ -15,6 +14,8 @@ resurssit = {
 
 def luo_ikkuna(leveys, korkeus):
     resurssit["ikkuna"] = pyglet.window.Window(leveys, korkeus)
+    resurssit["ikkuna"].set_caption("Miinantallaaja")
+    pyglet.clock.schedule(paivita_ikkuna)
 
 def lataa_kuvat(polku):
     pyglet.resource.path = [polku]
@@ -32,8 +33,8 @@ def maarita_hiiri(hiiren_klikkaus, hiiri_liike):
     resurssit["ikkuna"].on_mouse_press = hiiren_klikkaus
     resurssit["ikkuna"].on_mouse_motion = hiiri_liike
 
-def maarita_piirto(kasittelija):
-    resurssit["ikkuna"].on_draw = kasittelija
+def maarita_piirto(piirra_kentta):
+    resurssit["ikkuna"].on_draw = piirra_kentta
 
 def lisaa_puskuriin(avain, x, y):
     resurssit["spritet"].append(pyglet.sprite.Sprite(resurssit["kuvat"][str(avain)], x, y, batch=resurssit["puskuri"]))
@@ -53,7 +54,7 @@ def luo_teksti(teksti, leveys, korkeus, anchor_x, anchor_y, color=(0,0,0,255), k
     resurssit["teksti"].draw()
 
 def paivita_ikkuna(dt):
-    resurssit["ikkuna"].on_draw()
+    resurssit["ikkuna"].dispatch_events()
 
 def tyhjenna_ikkuna():
     resurssit["ikkuna"].clear()
@@ -62,5 +63,4 @@ def sulje():
     pyglet.app.exit()
 
 def kaynnista():
-    pyglet.clock.schedule_interval(paivita_ikkuna, .1)
     pyglet.app.run()
