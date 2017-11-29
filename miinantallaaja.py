@@ -8,11 +8,20 @@ vaikeustaso = {
     "vaikea": (30, 16, 99)
 }
 
+kentta = {
+    "kentta": [],
+    "leveys": None,
+    "korkeus": None,
+    "miinojen_koordinaatit": [],
+    "miinojen_lkm": None,
+}
+
 peli = {
     "kesto": None,
     "aika_aloitus": None,
     "aika_lopetus": None,
     "ensimmainen_ruutu": True,
+    "siirtojen_maara": 0,
     "voitettu": False,
     "havitty": False,
     "paattynyt": False
@@ -31,7 +40,7 @@ def laske_miinat(x, y):
                 if tarkista_koordinaatit(x + j, y + i):
                     viereiset_ruudut.append((x + j, y + i))
         for x, y in viereiset_ruudut:
-            if tarkista_koordinaatit(x, y) and (x, y) in miinojen_koordinaatit:
+            if tarkista_koordinaatit(x, y) and (x, y) in kentta["miinojen_koordinaatit"]:
                     miinoja_ymparilla += 1
         return miinoja_ymparilla
 
@@ -42,13 +51,13 @@ def avaa_ruutu(x_klikkaus, y_klikkaus):
     """
 
     if tarkista_koordinaatit(x_klikkaus, y_klikkaus):
-        if kentta[y_klikkaus][x_klikkaus] != "f" and (x_klikkaus, y_klikkaus) not in miinojen_koordinaatit:
+        if kentta["kentta"][y_klikkaus][x_klikkaus] != "f" and (x_klikkaus, y_klikkaus) not in kentta["miinojen_koordinaatit"]:
             tuntematon = [(x_klikkaus, y_klikkaus)]
             while tuntematon != []:
                 x, y = tuntematon[-1]
                 del tuntematon[-1]
                 miinoja_ymparilla = laske_miinat(x, y)
-                kentta[y][x] = str(miinoja_ymparilla)
+                kentta["kentta"][y][x] = str(miinoja_ymparilla)
                 if miinoja_ymparilla == 0:
                     ymparoivat_ruudut = []
                     for i in range(-1, 2):
@@ -56,12 +65,12 @@ def avaa_ruutu(x_klikkaus, y_klikkaus):
                             if tarkista_koordinaatit(x + i, y + j) and (x + i, y + j) != (x, y):
                                 ymparoivat_ruudut.append((x + i, y + j))
                     for (x, y) in ymparoivat_ruudut:
-                        if tarkista_koordinaatit(x, y) and (x, y) not in miinojen_koordinaatit and kentta[y][x] == " ":
+                        if tarkista_koordinaatit(x, y) and (x, y) not in kentta["miinojen_koordinaatit"] and kentta["kentta"][y][x] == " ":
                             tuntematon.append((x, y))
 
-        elif kentta[y_klikkaus][x_klikkaus] != "f" and (x_klikkaus, y_klikkaus) in miinojen_koordinaatit:
-            for x, y in miinojen_koordinaatit:
-                kentta[y][x] = "x"
+        elif kentta["kentta"][y_klikkaus][x_klikkaus] != "f" and (x_klikkaus, y_klikkaus) in kentta["miinojen_koordinaatit"]:
+            for x, y in kentta["miinojen_koordinaatit"]:
+                kentta["kentta"][y][x] = "x"
             peli["havitty"] = True
             peli["paattynyt"] = True
             peli["aika_lopetus"] = time.time()
@@ -80,35 +89,13 @@ def aseta_lippu(x, y):
     Asettaa lipun tyhjään ruutuun tai poistaa jo asetetun lipun.
     """
 
-    global miinoja_jaljella
-
     if not peli["ensimmainen_ruutu"]:
-        if kentta[y][x] == " ":
-            kentta[y][x] = "f"
-            miinoja_jaljella -= 1
-        elif kentta[y][x] == "f":
-            kentta[y][x] = " "
-            miinoja_jaljella += 1
-
-def avaa_kaikki():
-    """
-    Avaa kaikki kentällä olevat ruudut ja asettaa pelin päättyneeksi.
-    """
-
-    tuntematon = []
-    for x in range(len(kentta[0])):
-        for y in range(len(kentta) - 1):
-            tuntematon.append((x, y))
-    while tuntematon != []:
-        x, y = tuntematon[-1]
-        del tuntematon[-1]
-        if (x, y) in miinojen_koordinaatit and kentta[y][x] != "f":
-            kentta[y][x] = "x"
-            peli["havitty"] = True
-        elif kentta[y][x] != "f":
-            miinoja_ymparilla = laske_miinat(x, y)
-            kentta[y][x] = str(miinoja_ymparilla)
-    peli["paattynyt"] = True
+        if kentta["kentta"][y][x] == " ":
+            kentta["kentta"][y][x] = "f"
+            kentta["miinojen_lkm"] -= 1
+        elif kentta["kentta"][y][x] == "f":
+            kentta["kentta"][y][x] = " "
+            kentta["miinojen_lkm"] += 1
 
 def tarkista_koordinaatit(x, y):
     """
@@ -116,7 +103,7 @@ def tarkista_koordinaatit(x, y):
     Palauttaa True, jos koordinaatit ovat rajojen sisällä; muuten palautetaan False.
     """
 
-    if x >= leveys or y >= korkeus or x < 0 or y < 0 or kentta[y][x] == "hud":
+    if x >= kentta["leveys"] or y >= kentta["korkeus"] or x < 0 or y < 0 or kentta["kentta"][y][x] == "hud":
         return False
     else:
         return True
@@ -128,8 +115,8 @@ def miinoita(x_klikkaus, y_klikkaus):
     """
 
     vapaat_ruudut = []
-    for x in range(len(kentta[0])):
-        for y in range(len(kentta) - 1):
+    for x in range(kentta["leveys"]):
+        for y in range(kentta["korkeus"]):
             vapaat_ruudut.append((x, y))
 
     for i in range(-1, 2):
@@ -137,29 +124,27 @@ def miinoita(x_klikkaus, y_klikkaus):
             if tarkista_koordinaatit(x_klikkaus + i, y_klikkaus + j):
                 vapaat_ruudut.remove((x_klikkaus + i, y_klikkaus + j))
 
-    for i in range(miinojen_lkm):
+    for i in range(kentta["miinojen_lkm"]):
         x, y = random.choice(vapaat_ruudut)
-        miinojen_koordinaatit.append((x, y))
+        kentta["miinojen_koordinaatit"].append((x, y))
         vapaat_ruudut.remove((x, y))
 
 def luo_kentta():
-    kentta = []
-    for i in range(korkeus):
+    for i in range(kentta["korkeus"]):
         rivi = []
-        for j in range(leveys):
+        for j in range(kentta["leveys"]):
             rivi.append(" ")
-        kentta.append(rivi)
+        kentta["kentta"].append(rivi)
     hud = []
-    for i in range(leveys):
+    for i in range(kentta["leveys"]):
         hud.append("hud")
-    kentta.append(hud)
-    return kentta
+    kentta["kentta"].append(hud)
 
 def kysy_arvot():
     while True:
         try:
-            leveys = int(input("Anna kentän leveys: "))
-            if leveys <= 0:
+            kentta["leveys"] = int(input("Anna kentän leveys: "))
+            if kentta["leveys"] <= 0:
                 print("Syötetyn arvon täytyy olla positiivinen kokonaisluku")
                 continue
         except ValueError:
@@ -168,8 +153,8 @@ def kysy_arvot():
             break
     while True:
         try:
-            korkeus = int(input("Anna kentän korkeus: "))
-            if korkeus <= 0:
+            kentta["korkeus"] = int(input("Anna kentän korkeus: "))
+            if kentta["korkeus"] <= 0:
                 print("Syötetyn arvon täytyy olla positiivinen kokonaisluku")
                 continue
         except ValueError:
@@ -178,17 +163,17 @@ def kysy_arvot():
             break
     while True:
         try:
-            miinojen_lkm = int(input("Anna miinojen lukumäärä: "))
-            if miinojen_lkm <= 0:
+            kentta["miinojen_lkm"] = int(input("Anna miinojen lukumäärä: "))
+            if kentta["miinojen_lkm"] <= 0:
                 print("Syötetyn arvon täytyy olla positiivinen kokonaisluku")
                 continue
-            if miinojen_lkm >= leveys * korkeus:
+            if kentta["miinojen_lkm"] >= kentta["leveys"] * kentta["korkeus"]:
                 print("Noin monta miinaa ei mahdu valitsemallesi kentälle")
                 continue
         except ValueError:
             print("Syötetyn arvon täytyy olla positiivinen kokonaisluku")
         else:
-            return leveys, korkeus, miinojen_lkm
+            break
 
 def kysy_vaikeustaso():
     print("Valitse vaikeustaso:")
@@ -198,11 +183,14 @@ def kysy_vaikeustaso():
     while True:
         syote = input().lower()
         if syote == "h":
-            return vaikeustaso["helppo"]
+            kentta["leveys"], kentta["korkeus"], kentta["miinojen_lkm"] = vaikeustaso["helppo"]
+            break
         elif syote == "n":
-            return vaikeustaso["normaali"]
+            kentta["leveys"], kentta["korkeus"], kentta["miinojen_lkm"] = vaikeustaso["normaali"]
+            break
         elif syote == "v":
-            return vaikeustaso["vaikea"]
+            kentta["leveys"], kentta["korkeus"], kentta["miinojen_lkm"] = vaikeustaso["vaikea"]
+            break
         else:
             print("Täysin kelvoton syöte")
             continue
@@ -215,29 +203,19 @@ def piirra_kentta():
     """
 
     miinantallaaja_UI.tyhjenna_ikkuna()
-    for y, rivi in enumerate(kentta):
+    for y, rivi in enumerate(kentta["kentta"]):
         for x, avain in enumerate(rivi):
             miinantallaaja_UI.lisaa_puskuriin(avain, x * 40, y * 40)
     miinantallaaja_UI.piirra()
-    miinantallaaja_UI.luo_teksti("MIINOJA: {}".format(miinoja_jaljella), 5, korkeus * 40 + 20, "left", "center")
+    miinantallaaja_UI.luo_teksti("MIINOJA: {}".format(kentta["miinojen_lkm"]), 5, kentta["korkeus"] * 40 + 20, "left", "center")
     if peli["ensimmainen_ruutu"]:
-        miinantallaaja_UI.luo_teksti("AIKA: 00:00", leveys * 40 - 5, korkeus * 40 + 20, "right", "center")
+        miinantallaaja_UI.luo_teksti("AIKA: 00:00", kentta["leveys"] * 40 - 5, kentta["korkeus"] * 40 + 20, "right", "center")
     else:
-        miinantallaaja_UI.luo_teksti("AIKA: {}".format(kello()), leveys * 40 - 5, korkeus * 40 + 20, "right", "center")
+        miinantallaaja_UI.luo_teksti("AIKA: {}".format(kello()), kentta["leveys"] * 40 - 5, kentta["korkeus"] * 40 + 20, "right", "center")
     if peli["havitty"]:
-        miinantallaaja_UI.luo_teksti("HÄVISIT PELIN!", leveys * 20, korkeus * 20 + 40, "center", "center", (255,0,0,255), 20)
+        miinantallaaja_UI.luo_teksti("HÄVISIT PELIN!", kentta["leveys"] * 20, kentta["korkeus"] * 20 + 40, "center", "center", (255,255,255,255), 26)
     if peli["voitettu"]:
-        miinantallaaja_UI.luo_teksti("OLET VOITTAJA!", leveys * 20, korkeus * 20 + 40, "center", "center", (0,255,0,255), 20)
-
-def hiiri_liike(x, y, dx, dy):
-    """
-    Kutsutaan hiiren liikkuessa ikkunan sisällä.
-    """
-
-    x = int(x / 40)
-    y = int(y / 40)
-
-    #print("Hiiren koordinaatit: ", x, y)
+        miinantallaaja_UI.luo_teksti("VOITIT PELIN!", kentta["leveys"] * 20, kentta["korkeus"] * 20 + 40, "center", "center", (255,255,255,255), 26)
 
 def hiiren_klikkaus(x, y, painike, muokkausnappain):
     """
@@ -248,13 +226,16 @@ def hiiren_klikkaus(x, y, painike, muokkausnappain):
     x = int(x / 40)
     y = int(y / 40)
 
-    if not peli["paattynyt"]:
+    if not peli["paattynyt"] and kentta["kentta"][y][x] == " ":
         if painike == miinantallaaja_UI.HIIRI_VASEN:
-            if peli["ensimmainen_ruutu"] and kentta[y][x] == " ":
+            if peli["ensimmainen_ruutu"] and kentta["kentta"][y][x] == " ":
                 miinoita(x, y)
                 peli["aika_aloitus"] = time.time()
                 peli["ensimmainen_ruutu"] = False
+            peli["siirtojen_maara"] += 1
             avaa_ruutu(x, y)
+            if not peli["havitty"]:
+                tarkista_voitto()
 
         elif painike == miinantallaaja_UI.HIIRI_OIKEA:
             aseta_lippu(x, y)
@@ -263,23 +244,55 @@ def hiiren_klikkaus(x, y, painike, muokkausnappain):
         if painike == miinantallaaja_UI.HIIRI_VASEN:
             miinantallaaja_UI.sulje()
 
+def tarkista_voitto():
+    """
+    Tarkistaa ovatko kaikki miinattomat ruudut avattu.
+    """
+
+    avaamattomat_ruudut = 0
+    for rivi in kentta["kentta"]:
+        avaamattomat_ruudut += rivi.count(" ")
+    if avaamattomat_ruudut <= kentta["miinojen_lkm"]:
+        peli["voitettu"] = True
+        peli["paattynyt"] = True
+        peli["aika_lopetus"] = time.time()
+
+def alusta():
+    """
+    Asettaa pelin parametrit oletusarvoihin
+    """
+
+    kentta["kentta"] = []
+    kentta["leveys"] = None
+    kentta["korkeus"] = None
+    kentta["koordinaatit"] = []
+    kentta["miinojen_koordinaatit"] = []
+    kentta["miinojen_lkm"] = 0
+    peli["kesto"] = None
+    peli["aika_aloitus"] = None
+    peli["aika_lopetus"] = None
+    peli["ensimmainen_ruutu"] = True
+    peli["voitettu"] = False
+    peli["havitty"] = False
+    peli["paattynyt"] = False
+
 def main():
     """
     Lataa pelin grafiikat, luo peli-ikkunan ja asettaa siihen piirto- ja hiirikäsittelijät.
     """
 
-    leveys_pikseleina = leveys * 40
-    korkeus_pikseleina = korkeus * 40
+    alusta()
+    kysy_vaikeustaso()
+    luo_kentta()
+
+    leveys_pikseleina = kentta["leveys"] * 40
+    korkeus_pikseleina = kentta["korkeus"] * 40
 
     miinantallaaja_UI.lataa_kuvat("spritet")
     miinantallaaja_UI.luo_ikkuna(leveys_pikseleina, korkeus_pikseleina + 40)
     miinantallaaja_UI.maarita_piirto(piirra_kentta)
-    miinantallaaja_UI.maarita_hiiri(hiiren_klikkaus, hiiri_liike)
+    miinantallaaja_UI.maarita_hiiri(hiiren_klikkaus)
     miinantallaaja_UI.kaynnista()
 
 if __name__ == "__main__":
-    leveys, korkeus, miinojen_lkm = kysy_vaikeustaso()
-    kentta = luo_kentta()
-    miinoja_jaljella = miinojen_lkm
-    miinojen_koordinaatit = []
     main()
