@@ -69,12 +69,5 @@ def sulje():
     resurssit["ikkuna"].close()
     pyglet.app.exit()
 
-def alusta():
-    resurssit["ikkuna"] = None
-    resurssit["kuvat"] = {}
-    resurssit["spritet"] = []
-    resurssit["puskuri"] = None
-    resurssit["teksti"] = None
-
 def kaynnista():
     pyglet.app.run()
