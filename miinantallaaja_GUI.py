@@ -7,7 +7,7 @@ resurssit = {
     "ikkuna": None,
     "kuvat": {},
     "spritet": [],
-    "puskuri": pyglet.graphics.Batch(),
+    "puskuri": None,
     "teksti": None
 }
 
@@ -17,6 +17,9 @@ ryhma_teksti = pyglet.graphics.OrderedGroup(1)
 def luo_ikkuna(leveys, korkeus):
     resurssit["ikkuna"] = pyglet.window.Window(leveys, korkeus)
     resurssit["ikkuna"].set_caption("Miinantallaaja")
+
+def luo_puskuri():
+    resurssit["puskuri"] = pyglet.graphics.Batch()
 
 def lataa_kuvat(polku):
     pyglet.resource.path = [polku]
@@ -63,7 +66,15 @@ def tyhjenna_ikkuna():
     resurssit["ikkuna"].clear()
 
 def sulje():
+    resurssit["ikkuna"].close()
     pyglet.app.exit()
+
+def alusta():
+    resurssit["ikkuna"] = None
+    resurssit["kuvat"] = {}
+    resurssit["spritet"] = []
+    resurssit["puskuri"] = None
+    resurssit["teksti"] = None
 
 def kaynnista():
     pyglet.app.run()

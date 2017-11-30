@@ -1,19 +1,13 @@
-import miinantallaaja_UI
+import miinantallaaja_GUI, miinantallaaja_menu
 import random
 import time
-
-vaikeustaso = {
-    "helppo": (9, 9, 10),
-    "normaali": (16, 16, 40),
-    "vaikea": (30, 16, 99)
-}
 
 kentta = {
     "kentta": [],
     "leveys": None,
     "korkeus": None,
-    "miinojen_koordinaatit": [],
     "miinojen_lkm": None,
+    "miinojen_koordinaatit": []
 }
 
 peli = {
@@ -140,61 +134,6 @@ def luo_kentta():
         hud.append("hud")
     kentta["kentta"].append(hud)
 
-def kysy_arvot():
-    while True:
-        try:
-            kentta["leveys"] = int(input("Anna kentän leveys: "))
-            if kentta["leveys"] <= 0:
-                print("Syötetyn arvon täytyy olla positiivinen kokonaisluku")
-                continue
-        except ValueError:
-            print("Syötetyn arvon täytyy olla positiivinen kokonaisluku")
-        else:
-            break
-    while True:
-        try:
-            kentta["korkeus"] = int(input("Anna kentän korkeus: "))
-            if kentta["korkeus"] <= 0:
-                print("Syötetyn arvon täytyy olla positiivinen kokonaisluku")
-                continue
-        except ValueError:
-            print("Syötetyn arvon täytyy olla positiivinen kokonaisluku")
-        else:
-            break
-    while True:
-        try:
-            kentta["miinojen_lkm"] = int(input("Anna miinojen lukumäärä: "))
-            if kentta["miinojen_lkm"] <= 0:
-                print("Syötetyn arvon täytyy olla positiivinen kokonaisluku")
-                continue
-            if kentta["miinojen_lkm"] >= kentta["leveys"] * kentta["korkeus"]:
-                print("Noin monta miinaa ei mahdu valitsemallesi kentälle")
-                continue
-        except ValueError:
-            print("Syötetyn arvon täytyy olla positiivinen kokonaisluku")
-        else:
-            break
-
-def kysy_vaikeustaso():
-    print("Valitse vaikeustaso:")
-    print("(H)elppo")
-    print("(N)ormaali")
-    print("(V)aikea")
-    while True:
-        syote = input().lower()
-        if syote == "h":
-            kentta["leveys"], kentta["korkeus"], kentta["miinojen_lkm"] = vaikeustaso["helppo"]
-            break
-        elif syote == "n":
-            kentta["leveys"], kentta["korkeus"], kentta["miinojen_lkm"] = vaikeustaso["normaali"]
-            break
-        elif syote == "v":
-            kentta["leveys"], kentta["korkeus"], kentta["miinojen_lkm"] = vaikeustaso["vaikea"]
-            break
-        else:
-            print("Täysin kelvoton syöte")
-            continue
-
 def piirra_kentta():
     """
     Käsittelijäfunktio, joka piirtää kaksiulotteisena listana kuvatun miinakentän
@@ -202,20 +141,20 @@ def piirra_kentta():
     ruudun näkymän päivitystä.
     """
 
-    miinantallaaja_UI.tyhjenna_ikkuna()
+    miinantallaaja_GUI.tyhjenna_ikkuna()
     for y, rivi in enumerate(kentta["kentta"]):
         for x, avain in enumerate(rivi):
-            miinantallaaja_UI.lisaa_puskuriin(avain, x * 40, y * 40)
-    miinantallaaja_UI.piirra()
-    miinantallaaja_UI.luo_teksti("MIINOJA: {}".format(kentta["miinojen_lkm"]), 5, kentta["korkeus"] * 40 + 20, "left", "center")
+            miinantallaaja_GUI.lisaa_puskuriin(avain, x * 40, y * 40)
+    miinantallaaja_GUI.piirra()
+    miinantallaaja_GUI.luo_teksti("MIINOJA: {}".format(kentta["miinojen_lkm"]), 5, kentta["korkeus"] * 40 + 20, "left", "center")
     if peli["ensimmainen_ruutu"]:
-        miinantallaaja_UI.luo_teksti("AIKA: 00:00", kentta["leveys"] * 40 - 5, kentta["korkeus"] * 40 + 20, "right", "center")
+        miinantallaaja_GUI.luo_teksti("AIKA: 00:00", kentta["leveys"] * 40 - 5, kentta["korkeus"] * 40 + 20, "right", "center")
     else:
-        miinantallaaja_UI.luo_teksti("AIKA: {}".format(kello()), kentta["leveys"] * 40 - 5, kentta["korkeus"] * 40 + 20, "right", "center")
+        miinantallaaja_GUI.luo_teksti("AIKA: {}".format(kello()), kentta["leveys"] * 40 - 5, kentta["korkeus"] * 40 + 20, "right", "center")
     if peli["havitty"]:
-        miinantallaaja_UI.luo_teksti("HÄVISIT PELIN!", kentta["leveys"] * 20, kentta["korkeus"] * 20 + 40, "center", "center", (255,255,255,255), 26)
+        miinantallaaja_GUI.luo_teksti("HÄVISIT PELIN!", kentta["leveys"] * 20, kentta["korkeus"] * 20 + 40, "center", "center", (255,255,255,255), 26)
     if peli["voitettu"]:
-        miinantallaaja_UI.luo_teksti("VOITIT PELIN!", kentta["leveys"] * 20, kentta["korkeus"] * 20 + 40, "center", "center", (255,255,255,255), 26)
+        miinantallaaja_GUI.luo_teksti("VOITIT PELIN!", kentta["leveys"] * 20, kentta["korkeus"] * 20 + 40, "center", "center", (255,255,255,255), 26)
 
 def hiiren_klikkaus(x, y, painike, muokkausnappain):
     """
@@ -227,7 +166,7 @@ def hiiren_klikkaus(x, y, painike, muokkausnappain):
     y = int(y / 40)
 
     if not peli["paattynyt"] and kentta["kentta"][y][x] == " ":
-        if painike == miinantallaaja_UI.HIIRI_VASEN:
+        if painike == miinantallaaja_GUI.HIIRI_VASEN:
             if peli["ensimmainen_ruutu"] and kentta["kentta"][y][x] == " ":
                 miinoita(x, y)
                 peli["aika_aloitus"] = time.time()
@@ -237,12 +176,12 @@ def hiiren_klikkaus(x, y, painike, muokkausnappain):
             if not peli["havitty"]:
                 tarkista_voitto()
 
-        elif painike == miinantallaaja_UI.HIIRI_OIKEA:
+        elif painike == miinantallaaja_GUI.HIIRI_OIKEA:
             aseta_lippu(x, y)
 
     elif peli["paattynyt"]:
-        if painike == miinantallaaja_UI.HIIRI_VASEN:
-            miinantallaaja_UI.sulje()
+        if painike == miinantallaaja_GUI.HIIRI_VASEN:
+            miinantallaaja_GUI.sulje()
 
 def tarkista_voitto():
     """
@@ -281,18 +220,17 @@ def main():
     Lataa pelin grafiikat, luo peli-ikkunan ja asettaa siihen piirto- ja hiirikäsittelijät.
     """
 
-    alusta()
-    kysy_vaikeustaso()
     luo_kentta()
 
     leveys_pikseleina = kentta["leveys"] * 40
     korkeus_pikseleina = kentta["korkeus"] * 40
 
-    miinantallaaja_UI.lataa_kuvat("spritet")
-    miinantallaaja_UI.luo_ikkuna(leveys_pikseleina, korkeus_pikseleina + 40)
-    miinantallaaja_UI.maarita_piirto(piirra_kentta)
-    miinantallaaja_UI.maarita_hiiri(hiiren_klikkaus)
-    miinantallaaja_UI.kaynnista()
+    miinantallaaja_GUI.luo_puskuri()
+    miinantallaaja_GUI.lataa_kuvat("spritet")
+    miinantallaaja_GUI.luo_ikkuna(leveys_pikseleina, korkeus_pikseleina + 40)
+    miinantallaaja_GUI.maarita_piirto(piirra_kentta)
+    miinantallaaja_GUI.maarita_hiiri(hiiren_klikkaus)
+    miinantallaaja_GUI.kaynnista()
 
 if __name__ == "__main__":
-    main()
+    miinantallaaja_menu.paavalikko()
