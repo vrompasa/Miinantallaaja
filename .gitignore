@@ -8,4 +8,6 @@
 #GDD
 *.docx
 
+*.csv
+
 __pycache__/**

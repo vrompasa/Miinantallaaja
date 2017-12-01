@@ -6,6 +6,7 @@ kentta = {
     "kentta": [],
     "leveys": None,
     "korkeus": None,
+    "miinoja_jaljella": None,
     "miinojen_lkm": None,
     "miinojen_koordinaatit": []
 }
@@ -58,7 +59,8 @@ def avaa_ruutu(x_klikkaus, y_klikkaus):
                     ymparoivat_ruudut = []
                     for i in range(-1, 2):
                         for j in range(-1, 2):
-                            if tarkista_koordinaatit(x + i, y + j) and (x + i, y + j) != (x, y):
+                            if (tarkista_koordinaatit(x + i, y + j) and
+                                (x + i, y + j) != (x, y)):
                                 ymparoivat_ruudut.append((x + i, y + j))
                     for (x, y) in ymparoivat_ruudut:
                         if (tarkista_koordinaatit(x, y) and
@@ -89,10 +91,12 @@ def aseta_lippu(x, y):
     if not peli["ensimmainen_ruutu"]:
         if kentta["kentta"][y][x] == " ":
             kentta["kentta"][y][x] = "f"
-            kentta["miinojen_lkm"] -= 1
+            kentta["miinoja_jaljella"] -= 1
+            peli["siirtojen_maara"] += 1
         elif kentta["kentta"][y][x] == "f":
             kentta["kentta"][y][x] = " "
-            kentta["miinojen_lkm"] += 1
+            kentta["miinoja_jaljella"] += 1
+            peli["siirtojen_maara"] += 1
 
 def tarkista_koordinaatit(x, y):
     """
@@ -144,7 +148,7 @@ def piirra_kentta():
         for x, avain in enumerate(rivi):
             miinantallaaja_GUI.lisaa_puskuriin(avain, x * 40, y * 40)
     miinantallaaja_GUI.piirra()
-    miinantallaaja_GUI.luo_teksti("MIINOJA: {}".format(kentta["miinojen_lkm"]),
+    miinantallaaja_GUI.luo_teksti("MIINOJA: {}".format(kentta["miinoja_jaljella"]),
                                   5,
                                   kentta["korkeus"] * 40 + 20,
                                   "left",
@@ -190,8 +194,9 @@ def hiiren_klikkaus(x, y, painike, muokkausnappain):
     x = int(x / 40)
     y = int(y / 40)
 
-    if not peli["paattynyt"] and kentta["kentta"][y][x] == " ":
-        if painike == miinantallaaja_GUI.HIIRI_VASEN:
+    if not peli["paattynyt"]:
+        if (painike == miinantallaaja_GUI.HIIRI_VASEN and 
+            kentta["kentta"][y][x] == " "):
             if peli["ensimmainen_ruutu"] and kentta["kentta"][y][x] == " ":
                 miinoita(x, y)
                 peli["aika_aloitus"] = time.time()
@@ -203,6 +208,7 @@ def hiiren_klikkaus(x, y, painike, muokkausnappain):
         elif painike == miinantallaaja_GUI.HIIRI_OIKEA:
             aseta_lippu(x, y)
     elif peli["paattynyt"]:
+        tallenna_tilastot()
         if painike == miinantallaaja_GUI.HIIRI_VASEN:
             miinantallaaja_GUI.sulje()
 
@@ -211,10 +217,29 @@ def tarkista_voitto():
     avaamattomat_ruudut = 0
     for rivi in kentta["kentta"]:
         avaamattomat_ruudut += rivi.count(" ")
-    if avaamattomat_ruudut <= kentta["miinojen_lkm"]:
+    if avaamattomat_ruudut <= kentta["miinoja_jaljella"]:
         peli["voitettu"] = True
         peli["paattynyt"] = True
         peli["aika_lopetus"] = time.time()
+
+def tallenna_tilastot():
+    pvm = time.strftime("%d.%m.%Y %H:%M", time.localtime(peli["aika_lopetus"]))
+    kesto = time.strftime("%M:%S", peli["kesto"])
+    siirrot = str(peli["siirtojen_maara"])
+    if peli["voitettu"]:
+        lopputulos = "Voitto"
+    elif peli["havitty"]:
+        lopputulos = "Häviö"
+    kentan_koko = "{} x {}".format(kentta["leveys"], kentta["korkeus"])
+    miinojen_lkm = str(kentta["miinojen_lkm"])
+
+    try:
+        with open("tilastot.csv", "a") as tilastot:
+            tilastot.write("{},{},{},{},{},{}\n".format(pvm, kesto,
+                                                        siirrot, lopputulos,
+                                                        kentan_koko, miinojen_lkm))
+    except IOError:
+        print("Tilastot sisältävän tiedoston avaaminen epäonnistui")
 
 def alusta():
     """Asettaa pelin parametrit oletusarvoihin."""
@@ -224,10 +249,12 @@ def alusta():
     kentta["koordinaatit"] = []
     kentta["miinojen_koordinaatit"] = []
     kentta["miinojen_lkm"] = 0
+    kentta["miinoja_jaljella"] = None
     peli["kesto"] = None
     peli["aika_aloitus"] = None
     peli["aika_lopetus"] = None
     peli["ensimmainen_ruutu"] = True
+    peli["siirtojen_maara"] = 0
     peli["voitettu"] = False
     peli["havitty"] = False
     peli["paattynyt"] = False
@@ -238,6 +265,7 @@ def main():
     asettaa siihen piirto- ja hiirikäsittelijät ja käynnistää pelin.
     """
 
+    kentta["miinoja_jaljella"] = kentta["miinojen_lkm"]
     leveys_pikseleina = kentta["leveys"] * 40
     korkeus_pikseleina = kentta["korkeus"] * 40
     luo_kentta()

@@ -63,13 +63,31 @@ def kysy_arvot():
         else:
             return leveys, korkeus, miinojen_lkm
 
+def lataa_tilastot():
+    data = []
+    try:
+        with open("tilastot.csv") as f:
+            for rivi in f.readlines():
+                data.append(rivi.strip("\n"))
+    except IOError:
+        print("\nTilastot sisältävän tiedoston avaaminen epäonnistui")
+    return data
+
+def nayta_tilastot(data):
+    for rivi in data:
+        pmv, kesto, siirrot, lopputulos, kentta, miinat = rivi.split(",")
+        print("––––––––––––––––––––––––––––––––––––––––––––––")
+        print("{}        {}".format(pmv, lopputulos))
+        print("Kesto: {}          Siirtoja: {}".format(kesto, siirrot))
+        print("Kentta: {}        Miinojen määrä: {}".format(kentta, miinat))
+
 def paavalikko():
     while True:
-        print("\nTervetuloa pelaamaan miinantallaajaa!\n")
-        print("(P)elaa")
-        print("(T)ulokset")
-        print("(S)ulje")
+        print("\nTervetuloa pelaamaan miinantallaajaa!")
         while True:
+            print("\n(P)elaa")
+            print("(T)ilastot")
+            print("(S)ulje")
             syote = input("\nValitse syöttämällä suluissa annettu kirjain: ").lower()
             if syote == "p":
                 miinantallaaja.kentta["leveys"], miinantallaaja.kentta["korkeus"], miinantallaaja.kentta["miinojen_lkm"] = kysy_vaikeustaso()
@@ -77,7 +95,8 @@ def paavalikko():
                 miinantallaaja.alusta()
                 break
             elif syote == "t":
-                pass
+                data = lataa_tilastot()
+                nayta_tilastot(data)
             elif syote == "s":
                 sys.exit(0)
             else:
