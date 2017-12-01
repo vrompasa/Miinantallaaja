@@ -46,8 +46,8 @@ def avaa_ruutu(x_klikkaus, y_klikkaus):
     """
 
     if tarkista_koordinaatit(x_klikkaus, y_klikkaus):
-        if kentta["kentta"][y_klikkaus][x_klikkaus] != "f" and
-            (x_klikkaus, y_klikkaus) not in kentta["miinojen_koordinaatit"]:
+        if (kentta["kentta"][y_klikkaus][x_klikkaus] != "f" and
+            (x_klikkaus, y_klikkaus) not in kentta["miinojen_koordinaatit"]):
             tuntematon = [(x_klikkaus, y_klikkaus)]
             while tuntematon != []:
                 x, y = tuntematon[-1]
@@ -61,13 +61,13 @@ def avaa_ruutu(x_klikkaus, y_klikkaus):
                             if tarkista_koordinaatit(x + i, y + j) and (x + i, y + j) != (x, y):
                                 ymparoivat_ruudut.append((x + i, y + j))
                     for (x, y) in ymparoivat_ruudut:
-                        if tarkista_koordinaatit(x, y) and
+                        if (tarkista_koordinaatit(x, y) and
                             (x, y) not in kentta["miinojen_koordinaatit"] and
-                            kentta["kentta"][y][x] == " ":
+                            kentta["kentta"][y][x] == " "):
                             tuntematon.append((x, y))
 
-        elif kentta["kentta"][y_klikkaus][x_klikkaus] != "f" and
-            (x_klikkaus, y_klikkaus) in kentta["miinojen_koordinaatit"]:
+        elif (kentta["kentta"][y_klikkaus][x_klikkaus] != "f" and
+            (x_klikkaus, y_klikkaus) in kentta["miinojen_koordinaatit"]):
             for x, y in kentta["miinojen_koordinaatit"]:
                 kentta["kentta"][y][x] = "x"
             peli["havitty"] = True
@@ -100,8 +100,8 @@ def tarkista_koordinaatit(x, y):
     Palauttaa True, jos koordinaatit ovat rajojen sisällä; muuten palautetaan False.
     """
 
-    if x >= kentta["leveys"] or y >= kentta["korkeus"] or x < 0 or y < 0 or
-        kentta["kentta"][y][x] == "hud":
+    if (x >= kentta["leveys"] or y >= kentta["korkeus"] or
+        x < 0 or y < 0 or kentta["kentta"][y][x] == "hud"):
         return False
     else:
         return True
