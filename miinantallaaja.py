@@ -1,4 +1,6 @@
-import miinantallaaja_GUI, miinantallaaja_menu
+import miinantallaaja_GUI
+import miinantallaaja_menu
+
 import random
 import time
 
@@ -24,7 +26,7 @@ peli = {
 
 def laske_miinat(x, y):
     """
-    Laske annetussa kentässa yhden ruudun ympärillä olevat miinat ja
+    Laske yhden ruudun ympärillä olevat miinat ja
     palauta niiden lukumäärä.
     """
     miinoja_ymparilla = 0
@@ -35,8 +37,9 @@ def laske_miinat(x, y):
                 if tarkista_koordinaatit(x + j, y + i):
                     viereiset_ruudut.append((x + j, y + i))
         for x, y in viereiset_ruudut:
-            if tarkista_koordinaatit(x, y) and (x, y) in kentta["miinojen_koordinaatit"]:
-                    miinoja_ymparilla += 1
+            if (tarkista_koordinaatit(x, y) and
+                (x, y) in kentta["miinojen_koordinaatit"]):
+                miinoja_ymparilla += 1
         return miinoja_ymparilla
 
 def avaa_ruutu(x_klikkaus, y_klikkaus):
@@ -100,7 +103,7 @@ def aseta_lippu(x, y):
 
 def tarkista_koordinaatit(x, y):
     """
-    Tarkista ovatko annetut x, y -koordinaatit annettujen rajojen sisällä.
+    Tarkista ovatko annetut x, y -koordinaatit määritettyjen rajojen sisällä.
     Palauttaa True, jos koordinaatit ovat rajojen sisällä; muuten palautetaan False.
     """
 
@@ -113,7 +116,7 @@ def tarkista_koordinaatit(x, y):
 def miinoita(x_klikkaus, y_klikkaus):
     """
     Aseta kentälle n kpl miinoja satunnaisiin koordinaatteihin.
-    Miinoja ei aseteta klikkausta ympäröiviin ruutuihin.
+    Miinoja ei aseteta klikkausta ympäröiviin koordinaatteihin.
     """
 
     vapaat_ruudut = []
@@ -130,7 +133,7 @@ def miinoita(x_klikkaus, y_klikkaus):
         vapaat_ruudut.remove((x, y))
 
 def luo_kentta():
-    """Luo kaksiulotteinen lista annetun leveyden ja korkeuden perusteella."""
+    """Luo kentta annetun leveyden ja korkeuden perusteella."""
     for i in range(kentta["korkeus"]):
         rivi = []
         for j in range(kentta["leveys"]):
@@ -142,12 +145,12 @@ def luo_kentta():
     kentta["kentta"].append(hud)
 
 def piirra_kentta():
-    """Piirrä kentän ruudut ja teksti näkyviin peli-ikkunaan."""
+    """Käsittelijäfunktio grafiikkojen piirtämiselle peli-ikkunaan."""
     miinantallaaja_GUI.tyhjenna_ikkuna()
+    miinantallaaja_GUI.luo_puskuri()
     for y, rivi in enumerate(kentta["kentta"]):
-        for x, avain in enumerate(rivi):
-            miinantallaaja_GUI.lisaa_puskuriin(avain, x * 40, y * 40)
-    miinantallaaja_GUI.piirra()
+        for x, ruutu in enumerate(rivi):
+            miinantallaaja_GUI.luo_ruutu(ruutu, x * 40, y * 40)
     miinantallaaja_GUI.luo_teksti("MIINOJA: {}".format(kentta["miinoja_jaljella"]),
                                   5,
                                   kentta["korkeus"] * 40 + 20,
@@ -180,22 +183,24 @@ def piirra_kentta():
                                       "center",
                                       (255,255,255,255),
                                       26)
+    miinantallaaja_GUI.piirra()
 
 def hiiren_klikkaus(x, y, painike, muokkausnappain):
-    """Kutsutaan aina, kun ikkunaa klikataan.
+    """
+    Käsittelijäfunktio hiiren klikkaamiselle.
 
     Jos painetaan hiiren vasenta painiketta, kutsutaan avaa_ruutu-funktiota ja
     tarkistetaan onko peli voitettu. Enismmäisellä klikkauksella kutsutaan
     lisäksi miinoita-funktiota ja määritellään pelin aloitusajankohta.
-    Hiiren oikeata painiketta painaessa kutsutaan aseta_lippu-funktiota.
-    Mikäli peli on päättynyt, peli-ikkuna suljetaan hiiren vasenta nappia painamalla.
+    Hiiren oikeata painiketta painettaessa kutsutaan aseta_lippu-funktiota.
+    Mikäli peli on päättynyt, peli-ikkuna suljetaan hiiren vasenta painiketta painamalla.
     """
 
     x = int(x / 40)
     y = int(y / 40)
 
     if not peli["paattynyt"]:
-        if (painike == miinantallaaja_GUI.HIIRI_VASEN and 
+        if (painike == miinantallaaja_GUI.HIIRI_VASEN and
             kentta["kentta"][y][x] == " "):
             if peli["ensimmainen_ruutu"] and kentta["kentta"][y][x] == " ":
                 miinoita(x, y)
@@ -260,16 +265,10 @@ def alusta():
     peli["paattynyt"] = False
 
 def main():
-    """
-    Luo kentän, lataa pelin grafiikat, luo peli-ikkunan,
-    asettaa siihen piirto- ja hiirikäsittelijät ja käynnistää pelin.
-    """
-
     kentta["miinoja_jaljella"] = kentta["miinojen_lkm"]
     leveys_pikseleina = kentta["leveys"] * 40
     korkeus_pikseleina = kentta["korkeus"] * 40
     luo_kentta()
-    miinantallaaja_GUI.luo_puskuri()
     miinantallaaja_GUI.lataa_kuvat("spritet")
     miinantallaaja_GUI.luo_ikkuna(leveys_pikseleina, korkeus_pikseleina + 40)
     miinantallaaja_GUI.maarita_piirto(piirra_kentta)

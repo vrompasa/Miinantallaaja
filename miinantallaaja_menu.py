@@ -1,5 +1,6 @@
 import miinantallaaja
-import sys
+
+from sys import exit
 
 vaikeustaso = {
     "helppo": (9, 9, 10),
@@ -7,12 +8,37 @@ vaikeustaso = {
     "vaikea": (30, 16, 99)
 }
 
+def paavalikko():
+    while True:
+        print("\nTervetuloa pelaamaan miinantallaajaa!")
+        while True:
+            print("\n(P)elaa")
+            print("(T)ilastot")
+            print("(S)ulje")
+            syote = input("\nValitse syöttämällä suluissa annettu kirjain: ").lower()
+            if syote == "p":
+                (miinantallaaja.kentta["leveys"],
+                 miinantallaaja.kentta["korkeus"],
+                 miinantallaaja.kentta["miinojen_lkm"]) = kysy_vaikeustaso()
+                miinantallaaja.main()
+                miinantallaaja.alusta()
+                break
+            elif syote == "t":
+                data = lataa_tilastot()
+                nayta_tilastot(data)
+            elif syote == "s":
+                exit()
+            else:
+                print("\nSyötä suluissa annettu kirjain")
+                continue
+
 def kysy_vaikeustaso():
     print("\nValitse vaikeustaso:\n")
     print("(H)elppo")
     print("(N)ormaali")
     print("(V)aikea")
     print("\n(M)ukautettu\n")
+    print("(T)akaisin\n")
     while True:
         syote = input("Valitse syöttämällä suluissa annettu kirjain: ").lower()
         if syote == "h":
@@ -80,25 +106,3 @@ def nayta_tilastot(data):
         print("{}        {}".format(pmv, lopputulos))
         print("Kesto: {}          Siirtoja: {}".format(kesto, siirrot))
         print("Kentta: {}        Miinojen määrä: {}".format(kentta, miinat))
-
-def paavalikko():
-    while True:
-        print("\nTervetuloa pelaamaan miinantallaajaa!")
-        while True:
-            print("\n(P)elaa")
-            print("(T)ilastot")
-            print("(S)ulje")
-            syote = input("\nValitse syöttämällä suluissa annettu kirjain: ").lower()
-            if syote == "p":
-                miinantallaaja.kentta["leveys"], miinantallaaja.kentta["korkeus"], miinantallaaja.kentta["miinojen_lkm"] = kysy_vaikeustaso()
-                miinantallaaja.main()
-                miinantallaaja.alusta()
-                break
-            elif syote == "t":
-                data = lataa_tilastot()
-                nayta_tilastot(data)
-            elif syote == "s":
-                sys.exit(0)
-            else:
-                print("\nSyötä suluissa annettu kirjain")
-                continue
