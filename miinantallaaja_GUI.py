@@ -53,26 +53,15 @@ def maarita_piirto(piirra_kentta):
     resurssit["ikkuna"].on_draw = piirra_kentta
 
 def luo_ruutu(ruutu, x, y):
-    """Luo puskuriin lisättävä ruutu kohtaan (x, y)"""
+    """Luo ruutu kohtaan (x, y) ja lisää se puskuriin"""
     resurssit["spritet"].append(pyglet.sprite.Sprite(resurssit["kuvat"][str(ruutu)],
-                                                     x,
-                                                     y,
+                                                     x * 40,
+                                                     y * 40,
                                                      batch=resurssit["puskuri"],
                                                      group=RYHMA_KENTTA))
 
 def luo_teksti(teksti, x, y, anchor_x, anchor_y, vari=(0,0,0,255), koko=14):
-    """
-    Luo puskuriin lisättävä teksti kohtaan (x, y).
-
-    teksti -- piirrettävä teksti
-    x -- tekstin ankkurin x-koordinaatti
-    y -- tekstin ankkurin y-koordinaatti
-    anchor_x -- tekstin x-ankkurin sijainti
-    anchor_y -- tekstin y-ankkurin sijainti
-    vari -- tekstin väri RGBA-arvona (default (0,0,0,255))
-    koko -- tekstin fonttikoko (default 14)
-    """
-
+    """Luo teksti ja lisää se puskuriin."""
     pyglet.font.add_file("VCR_OSD_MONO.ttf")
     resurssit["teksti"].append(pyglet.text.Label(teksti,
                                                  font_name="VCR OSD MONO",

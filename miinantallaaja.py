@@ -150,7 +150,7 @@ def piirra_kentta():
     miinantallaaja_GUI.luo_puskuri()
     for y, rivi in enumerate(kentta["kentta"]):
         for x, ruutu in enumerate(rivi):
-            miinantallaaja_GUI.luo_ruutu(ruutu, x * 40, y * 40)
+            miinantallaaja_GUI.luo_ruutu(ruutu, x, y)
     miinantallaaja_GUI.luo_teksti("MIINOJA: {}".format(kentta["miinoja_jaljella"]),
                                   5,
                                   kentta["korkeus"] * 40 + 20,
@@ -183,6 +183,14 @@ def piirra_kentta():
                                       "center",
                                       (255,255,255,255),
                                       26)
+    if peli["paattynyt"]:
+        miinantallaaja_GUI.luo_teksti("KLIKKAA PALATAKSESI PÄÄVALIKKOON",
+                                      kentta["leveys"] * 20,
+                                      kentta["korkeus"] * 20,
+                                      "center",
+                                      "center",
+                                      (255,255,255,255),
+                                      14)
     miinantallaaja_GUI.piirra()
 
 def hiiren_klikkaus(x, y, painike, muokkausnappain):
@@ -239,12 +247,12 @@ def tallenna_tilastot():
     miinojen_lkm = str(kentta["miinojen_lkm"])
 
     try:
-        with open("tilastot.csv", "a") as tilastot:
-            tilastot.write("{},{},{},{},{},{}\n".format(pvm, kesto,
-                                                        siirrot, lopputulos,
-                                                        kentan_koko, miinojen_lkm))
+        with open("tilastot.csv", "a") as f:
+            f.write("{},{},{},{},{},{}\n".format(pvm, kesto,
+                                                 siirrot, lopputulos,
+                                                 kentan_koko, miinojen_lkm))
     except IOError:
-        print("Tilastot sisältävän tiedoston avaaminen epäonnistui")
+        print("\nTallentaminen epäonnistui")
 
 def alusta():
     """Asettaa pelin parametrit oletusarvoihin."""
@@ -265,15 +273,23 @@ def alusta():
     peli["paattynyt"] = False
 
 def main():
-    kentta["miinoja_jaljella"] = kentta["miinojen_lkm"]
-    leveys_pikseleina = kentta["leveys"] * 40
-    korkeus_pikseleina = kentta["korkeus"] * 40
-    luo_kentta()
-    miinantallaaja_GUI.lataa_kuvat("spritet")
-    miinantallaaja_GUI.luo_ikkuna(leveys_pikseleina, korkeus_pikseleina + 40)
-    miinantallaaja_GUI.maarita_piirto(piirra_kentta)
-    miinantallaaja_GUI.maarita_hiiri(hiiren_klikkaus)
-    miinantallaaja_GUI.kaynnista()
+    while True:
+        (kentta["leveys"],
+         kentta["korkeus"],
+         kentta["miinojen_lkm"]) = miinantallaaja_menu.paavalikko()
+        kentta["miinoja_jaljella"] = kentta["miinojen_lkm"]
+        leveys_pikseleina = kentta["leveys"] * 40
+        korkeus_pikseleina = kentta["korkeus"] * 40
+        luo_kentta()
+        miinantallaaja_GUI.lataa_kuvat("spritet")
+        miinantallaaja_GUI.luo_ikkuna(leveys_pikseleina, korkeus_pikseleina + 40)
+        miinantallaaja_GUI.maarita_piirto(piirra_kentta)
+        miinantallaaja_GUI.maarita_hiiri(hiiren_klikkaus)
+        miinantallaaja_GUI.kaynnista()
+        alusta()
 
 if __name__ == "__main__":
-    miinantallaaja_menu.paavalikko()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n\nOhjelma lopetettu\n") 

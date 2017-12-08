@@ -17,12 +17,11 @@ def paavalikko():
             print("(S)ulje")
             syote = input("\nValitse syöttämällä suluissa annettu kirjain: ").lower()
             if syote == "p":
-                (miinantallaaja.kentta["leveys"],
-                 miinantallaaja.kentta["korkeus"],
-                 miinantallaaja.kentta["miinojen_lkm"]) = kysy_vaikeustaso()
-                miinantallaaja.main()
-                miinantallaaja.alusta()
-                break
+                try:
+                    leveys, korkeus, miinojen_lkm = kysy_vaikeustaso()
+                except TypeError:
+                    continue
+                return leveys, korkeus, miinojen_lkm
             elif syote == "t":
                 data = lataa_tilastot()
                 nayta_tilastot(data)
@@ -38,9 +37,9 @@ def kysy_vaikeustaso():
     print("(N)ormaali")
     print("(V)aikea")
     print("\n(M)ukautettu\n")
-    print("(T)akaisin\n")
+    print("(T)akaisin")
     while True:
-        syote = input("Valitse syöttämällä suluissa annettu kirjain: ").lower()
+        syote = input("\nValitse syöttämällä suluissa annettu kirjain: ").lower()
         if syote == "h":
             return vaikeustaso["helppo"]
         elif syote == "n":
@@ -50,8 +49,10 @@ def kysy_vaikeustaso():
         elif syote == "m":
             leveys, korkeus, miinojen_lkm = kysy_arvot()
             return leveys, korkeus, miinojen_lkm
+        elif syote == "t":
+            break
         else:
-            print("Täysin kelvoton syöte\n")
+            print("\nSyötä suluissa annettu kirjain")
             continue
 
 def kysy_arvot():
@@ -59,33 +60,33 @@ def kysy_arvot():
         try:
             leveys = int(input("\nAnna kentän leveys väliltä 8-36: "))
             if leveys < 8 or leveys > 36:
-                print("\nSyötetyn arvon täytyy olla välillä 8-36")
+                print("\nLeveys täytyy olla välillä 8-36")
                 continue
         except ValueError:
-            print("\nSyötetyn arvon täytyy olla luku välillä 8-36")
+            print("\nLeveys täytyy olla kokonaisluku")
         else:
             break
     while True:
         try:
             korkeus = int(input("\nAnna kentän korkeus väliltä 3-20: "))
             if korkeus < 3 or korkeus > 20:
-                print("\nSyötetyn arvon täytyy olla välillä 3-20")
+                print("\nKorkeus täytyy olla välillä 3-20")
                 continue
         except ValueError:
-            print("\nSyötetyn arvon täytyy olla luku väliltä 3-20")
+            print("\nKorkeus täytyy olla kokonaisluku")
         else:
             break
     while True:
         try:
             miinojen_lkm = int(input("\nAnna miinojen lukumäärä väliltä 1-{}: ".format(leveys * korkeus - 10)))
             if miinojen_lkm < 1:
-                print("\nAnna kokonaisluku väliltä 1-{}".format(leveys * korkeus - 10))
+                print("\nMiinoja olisi hyvä olla vähintään yksi")
                 continue
             if miinojen_lkm > leveys * korkeus - 10:
                 print("\nLiikaa miinoja!")
                 continue
         except ValueError:
-            print("\nAnna kokonaisluku väliltä 1-{}".format(leveys * korkeus - 10))
+            print("\nLukumäärät ovat usein positiivisia kokonaislukuja")
         else:
             return leveys, korkeus, miinojen_lkm
 
@@ -96,7 +97,9 @@ def lataa_tilastot():
             for rivi in f.readlines():
                 data.append(rivi.strip("\n"))
     except IOError:
-        print("\nTilastot sisältävän tiedoston avaaminen epäonnistui")
+        print("\nTilastot sisältävää tiedostoa ei löydy")
+    except UnicodeDecodeError:
+        print("\nTilastot sisältävä tiedosto on korruptoitunut")
     return data
 
 def nayta_tilastot(data):
