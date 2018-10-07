@@ -1,3 +1,3 @@
 # Miinantallaaja
 
-Ohjelmoinnin alkeet -kurssin lopputyö
+Pythonilla toteutettu miinaharava-klooni ohjelmoinnin alkeet -kurssille.
